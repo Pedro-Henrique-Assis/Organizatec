@@ -1,0 +1,72 @@
+<!-- src/main/resources/templates/employees/activities.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title th:text="'Atividades • ' + ${employee.name}">Atividades</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+    <style>
+        :root{--bg:#0b0b10;--panel:#12121a;--card:#0f1117;--text:#e9eef5;--muted:#9aa4b2;--primary:#3b82f6;--border:#1f2530}
+        body{margin:0;background:radial-gradient(1200px 800px at 80% -10%,#12203355,transparent),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+        .app{min-height:100svh;display:grid;grid-template-rows:auto 1fr}
+        header{position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(11,11,16,.7);border-bottom:1px solid var(--border)}
+        .nav{max-width:1100px;margin:0 auto;padding:16px 20px;display:flex;justify-content:space-between;align-items:center}
+        .badge{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:linear-gradient(135deg,#3b82f6,#22d3ee)}
+        main{max-width:1100px;margin:0 auto;padding:28px 20px 40px;display:grid;gap:16px}
+        .panel{background:linear-gradient(180deg,#0f1422 0%,#0d0f16 100%);border:1px solid var(--border);border-radius:16px;padding:20px}
+        .title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+        .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0d1220;color:var(--text);cursor:pointer}
+        .btn.primary{background:linear-gradient(135deg,#3b82f6,#22d3ee);border:none;color:#0b0b10;font-weight:700}
+        .table{width:100%;border-collapse:collapse}
+        .table th{font-size:13px;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);padding:12px}
+        .table td{padding:12px;border-top:1px solid #151a24}
+        .empty{padding:24px;border:1px dashed var(--border);border-radius:12px;color:var(--muted);text-align:center;background:#0d1220}
+    </style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <div class="nav">
+            <div style="display:flex;align-items:center;gap:12px">
+                <div class="badge">🗓</div>
+                <strong th:text="'Atividades • ' + ${employee.name}">Atividades • Funcionário</strong>
+            </div>
+            <div>
+                <a class="btn" th:href="@{/employees}">Voltar</a>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="panel">
+            <div class="title">
+                <h2 style="margin:0;font-size:20px">Registro de atividades</h2>
+                <a class="btn primary" th:href="@{/employees}">Voltar</a>
+            </div>
+
+            <div th:if="${#lists.isEmpty(activities)}" class="empty">
+                Nenhuma atividade encontrada.
+            </div>
+
+            <table class="table" th:if="${!#lists.isEmpty(activities)}">
+                <thead>
+                <tr>
+                    <th>Início</th>
+                    <th>Título</th>
+                    <th>Descrição</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${activities}">
+                    <td th:text="${a.startedAt != null ? #temporals.format(a.startedAt, 'dd/MM/yyyy HH:mm') : '-'}">01/01/2025 09:00</td>
+                    <td th:text="${a.title}">Título</td>
+                    <td th:text="${a.description}">Descrição</td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+</div>
+</body>
+</html>

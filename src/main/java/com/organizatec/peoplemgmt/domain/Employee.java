@@ -70,6 +70,20 @@ public class Employee extends BaseEntity {
         return baseSalary.add(allowance);
     }
 
+    @Transient
+    public double getTotalSalary() {
+        double base = getBaseSalary() == null ? 0.0 : getBaseSalary().doubleValue();
+        return base + allowanceForRole(this.getRoleTitle());
+    }
+
+    private static double allowanceForRole(String role){
+        if(role == null) return 0.0;
+        String r = role.trim().toLowerCase();
+        if ("gerente".equals(r) || "manager".equals(r)) return 1500.0;
+        if ("analista".equals(r) || "analyst".equals(r)) return 600.0;
+        return 0.0;
+    }
+
     // ===== Getters and Setters =====
 
     public String getName() {
@@ -136,11 +150,6 @@ public class Employee extends BaseEntity {
         this.department = department;
     }
 
-    public Set<Project> getProjects() {
-        return projects;
-    }
-
-    public void setProjects(Set<Project> projects) {
-        this.projects = projects;
-    }
+    public Set<Project> getProjects() { return projects; }
+    public void setProjects(Set<Project> projects) { this.projects = projects; }
 }

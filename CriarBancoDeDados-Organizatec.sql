@@ -1,127 +1,134 @@
--- 01) DB
-IF DB_ID('organizatec') IS NULL CREATE DATABASE organizatec;
-GO
-USE organizatec;
-GO
+/* === Selecione o banco correto === */
+-- USE Organizatec;
+-- GO
 
--- 02) Tabelas base
+/* ========= DROP em ordem segura (filhos -> pais) ========= */
+IF OBJECT_ID('dbo.employee_projects','U') IS NOT NULL DROP TABLE dbo.employee_projects;
+IF OBJECT_ID('dbo.time_entries','U') IS NOT NULL DROP TABLE dbo.time_entries;
+IF OBJECT_ID('dbo.employee_activities','U') IS NOT NULL DROP TABLE dbo.employee_activities;
+IF OBJECT_ID('dbo.employee_role_history','U') IS NOT NULL DROP TABLE dbo.employee_role_history;
+IF OBJECT_ID('dbo.visits','U') IS NOT NULL DROP TABLE dbo.visits;
+
+IF OBJECT_ID('dbo.projects','U') IS NOT NULL DROP TABLE dbo.projects;
+IF OBJECT_ID('dbo.visitors','U') IS NOT NULL DROP TABLE dbo.visitors;
+/* Se quiser recriar base inteira, pode dropar também employees/departments.
+   Se NÃO quiser perder funcionários/departamentos, comente as duas linhas abaixo. */
+IF OBJECT_ID('dbo.employees','U') IS NOT NULL DROP TABLE dbo.employees;
+IF OBJECT_ID('dbo.departments','U') IS NOT NULL DROP TABLE dbo.departments;
+
+PRINT('Tabelas antigas removidas');
+
+/* ========= CREATE ========= */
+
+/* Departments */
 CREATE TABLE departments (
-	id           BIGINT IDENTITY PRIMARY KEY,
-	name         VARCHAR(120) NOT NULL UNIQUE
+  id   BIGINT IDENTITY PRIMARY KEY,
+  name VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE projects (
-	id           BIGINT IDENTITY PRIMARY KEY,
-	name         VARCHAR(120) NOT NULL UNIQUE
-);
-
--- 03) Funcionários
+/* Employees */
 CREATE TABLE employees (
-	id              BIGINT IDENTITY PRIMARY KEY,
-	name            VARCHAR(150) NOT NULL,
-	cpf             VARCHAR(14)  NOT NULL UNIQUE,
-	birth_date      DATE         NOT NULL,
-	enrollment      VARCHAR(32)  NOT NULL UNIQUE, -- matrícula gerada automaticamente
-	role_title      VARCHAR(100) NOT NULL,
-	base_salary     DECIMAL(12,2) NOT NULL,
-	hired_at        DATE          NOT NULL,
-	department_id   BIGINT        NOT NULL
-	  CONSTRAINT fk_emp_dept REFERENCES departments(id)
+  id            BIGINT IDENTITY PRIMARY KEY,
+  name          VARCHAR(150) NOT NULL,
+  cpf           VARCHAR(14)  NOT NULL UNIQUE, -- com máscara (já validamos no app)
+  birth_date    DATE         NOT NULL,
+  enrollment    VARCHAR(40)  NOT NULL UNIQUE,
+  role_title    VARCHAR(100) NOT NULL,
+  base_salary   DECIMAL(18,2) NOT NULL,
+  hired_at      DATE          NOT NULL,
+  department_id BIGINT        NULL
+    CONSTRAINT fk_emp_dept REFERENCES departments(id),
+  created_at    DATETIME2     NOT NULL DEFAULT SYSDATETIME()
 );
 
-CREATE TABLE employee_role_history (
-	id           BIGINT IDENTITY PRIMARY KEY,
-	employee_id  BIGINT NOT NULL
-	  CONSTRAINT fk_rolehist_emp REFERENCES employees(id) ON DELETE CASCADE,
-	role_title   VARCHAR(100) NOT NULL,
-	start_date   DATE NOT NULL,
-	end_date     DATE NULL
+/* Projects */
+CREATE TABLE projects (
+  id           BIGINT IDENTITY PRIMARY KEY,
+  name         VARCHAR(120) NOT NULL,
+  description  VARCHAR(500) NULL
 );
 
+/* Employee x Projects (N:N) */
 CREATE TABLE employee_projects (
-	employee_id BIGINT NOT NULL
-	  CONSTRAINT fk_ep_emp REFERENCES employees(id) ON DELETE CASCADE,
-	project_id  BIGINT NOT NULL
-	  CONSTRAINT fk_ep_proj REFERENCES projects(id) ON DELETE CASCADE,
-	CONSTRAINT pk_ep PRIMARY KEY (employee_id, project_id)
+  employee_id BIGINT NOT NULL
+    CONSTRAINT fk_empprj_emp REFERENCES employees(id) ON DELETE CASCADE,
+  project_id  BIGINT NOT NULL
+    CONSTRAINT fk_empprj_prj REFERENCES projects(id)  ON DELETE CASCADE,
+  CONSTRAINT pk_empprj PRIMARY KEY (employee_id, project_id)
 );
 
+/* Histórico de Cargos */
+CREATE TABLE employee_role_history (
+  id            BIGINT IDENTITY PRIMARY KEY,
+  employee_id   BIGINT NOT NULL
+    CONSTRAINT fk_erh_emp REFERENCES employees(id) ON DELETE CASCADE,
+  role_title    VARCHAR(100) NOT NULL,
+  base_salary   DECIMAL(18,2) NOT NULL,
+  start_date    DATE NOT NULL,
+  end_date      DATE NULL,
+  change_reason VARCHAR(200) NULL
+);
+
+CREATE TABLE dbo.employee_activities (
+	id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+	employee_id    BIGINT       NOT NULL
+		CONSTRAINT fk_empact_emp REFERENCES dbo.employees(id) ON DELETE CASCADE,
+	title          VARCHAR(150) NOT NULL,
+	description    VARCHAR(1000) NULL,
+	started_at     DATETIME2    NOT NULL,
+	finished_at    DATETIME2    NULL,
+	created_at     DATETIME2    NOT NULL DEFAULT SYSDATETIME()
+);
+
+/* Batidas de Ponto */
 CREATE TABLE time_entries (
-	id           BIGINT IDENTITY PRIMARY KEY,
-	employee_id  BIGINT NOT NULL
-	  CONSTRAINT fk_time_emp REFERENCES employees(id) ON DELETE CASCADE,
-	punch_time   DATETIME2 NOT NULL,
-	punch_type   VARCHAR(8) NOT NULL CHECK (punch_type IN ('IN','OUT'))
+  id          BIGINT IDENTITY PRIMARY KEY,
+  employee_id BIGINT NOT NULL
+    CONSTRAINT fk_te_emp REFERENCES employees(id) ON DELETE CASCADE,
+  punch_type  VARCHAR(10) NOT NULL, -- IN/OUT
+  occurred_at DATETIME2   NOT NULL DEFAULT SYSDATETIME()
 );
 
-CREATE TABLE activities (
-	id           BIGINT IDENTITY PRIMARY KEY,
-	employee_id  BIGINT NOT NULL
-	  CONSTRAINT fk_act_emp REFERENCES employees(id) ON DELETE CASCADE,
-	description  VARCHAR(400) NOT NULL,
-	created_at   DATETIME2 NOT NULL DEFAULT SYSDATETIME()
-);
-
--- 04) Terceirizados
-CREATE TABLE contractors (
-	id                 BIGINT IDENTITY PRIMARY KEY,
-	name               VARCHAR(150) NOT NULL,
-	cpf                VARCHAR(14)  NOT NULL UNIQUE,
-	function_title     VARCHAR(100) NOT NULL,
-	provider_company   VARCHAR(120) NOT NULL,
-	contract_start     DATE NOT NULL,
-	contract_end       DATE NULL,
-	internal_resp_id   BIGINT NULL
-	  CONSTRAINT fk_contr_resp REFERENCES employees(id)
-);
-
-CREATE TABLE contractor_departments (
-	contractor_id BIGINT NOT NULL
-	  CONSTRAINT fk_cd_contr REFERENCES contractors(id) ON DELETE CASCADE,
-	department_id BIGINT NOT NULL
-	  CONSTRAINT fk_cd_dept REFERENCES departments(id) ON DELETE CASCADE,
-	CONSTRAINT pk_cd PRIMARY KEY (contractor_id, department_id)
-);
-
-CREATE TABLE contractor_access (
-	id             BIGINT IDENTITY PRIMARY KEY,
-	contractor_id  BIGINT NOT NULL
-	  CONSTRAINT fk_cacc_contr REFERENCES contractors(id) ON DELETE CASCADE,
-	entry_time     DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-	exit_time      DATETIME2 NULL
-);
-
--- 05) Visitantes
+/* Visitors (separado do Visit — cadastro de pessoas externas) */
 CREATE TABLE visitors (
-	id            BIGINT IDENTITY PRIMARY KEY,
-	name          VARCHAR(150) NOT NULL,
-	document_id   VARCHAR(40)  NOT NULL,
-	reason        VARCHAR(200) NOT NULL
+  id           BIGINT IDENTITY PRIMARY KEY,
+  name         VARCHAR(150) NOT NULL,
+  document_id  VARCHAR(20)  NULL,
+  company      VARCHAR(100) NULL,
+  created_at   DATETIME2    NOT NULL DEFAULT SYSDATETIME()
 );
 
+/* Visits (registros de entrada/saída) */
 CREATE TABLE visits (
-	id              BIGINT IDENTITY PRIMARY KEY,
-	visitor_id		BIGINT NULL
-	  CONSTRAINT fk_vis_visitors REFERENCES visitors(id) ON DELETE CASCADE,
-	visited_dept_id BIGINT NULL
-	  CONSTRAINT fk_vis_dept REFERENCES departments(id),
-	visited_emp_id  BIGINT NULL
-	  CONSTRAINT fk_vis_emp REFERENCES employees(id),
-	entry_time      DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-	exit_time       DATETIME2 NULL,
-	badge_code      VARCHAR(24) NOT NULL,
-	company			VARCHAR(100) NULL,
-	visitor_name	VARCHAR(150) NULL,
-	document_id		VARCHAR(20)  NULL,
-	reason			VARCHAR(500) NULL,
-	vehicle_plate	VARCHAR(10)  NULL
+  id               BIGINT IDENTITY PRIMARY KEY,
+  visitor_id       BIGINT NULL
+    CONSTRAINT fk_vis_visitors REFERENCES visitors(id) ON DELETE CASCADE,
+  visited_dept_id  BIGINT NULL
+    CONSTRAINT fk_vis_dept REFERENCES departments(id),
+  visited_emp_id   BIGINT NULL
+    CONSTRAINT fk_vis_emp REFERENCES employees(id),
+  entry_time       DATETIME2 NOT NULL,
+  exit_time        DATETIME2 NULL,
+  badge_code       VARCHAR(24) NOT NULL,
+  company		   VARCHAR(100) NULL,
+  visitor_name     VARCHAR(150) NULL,
+  document_id      VARCHAR(20)  NULL,
+  reason           VARCHAR(500) NULL,
+  vehicle_plate    VARCHAR(10)  NULL,
+  created_at       DATETIME2    NOT NULL DEFAULT SYSDATETIME()
 );
 
--- 06) Índices úteis
+/* ========= Índices úteis ========= */
 CREATE INDEX ix_emp_dept ON employees(department_id);
-CREATE INDEX ix_vis_period ON visits(entry_time, exit_time);
-CREATE INDEX ix_time_entries_emp ON time_entries(employee_id, punch_time);
+CREATE INDEX ix_vis_emp  ON visits(visited_emp_id);
+CREATE INDEX ix_vis_dept ON visits(visited_dept_id);
+CREATE INDEX ix_vis_time ON visits(entry_time);
+CREATE INDEX IX_empact_emp_started ON dbo.employee_activities(employee_id, started_at DESC);
 
--- 07) Seeds mínimos
-INSERT INTO departments(name) VALUES ('RH'),('Segurança'),('TI'),('Operações');
-INSERT INTO projects(name) VALUES ('Intranet'),('ERP'),('Reforma Sede');
+/* ========= Seeds mínimos (opcional) ========= */
+IF NOT EXISTS (SELECT 1 FROM departments) INSERT INTO departments(name) VALUES ('Administração'), ('Tecnologia'), ('Operações'), ('RH');
+
+-- Exemplo de projeto
+IF NOT EXISTS (SELECT 1 FROM projects) INSERT INTO projects(name, description) VALUES ('Intranet 2.0','Portal interno da organização');
+
+PRINT('Schema criado com sucesso');

@@ -5,16 +5,13 @@ import com.organizatec.peoplemgmt.repo.DepartmentRepo;
 import com.organizatec.peoplemgmt.service.EmployeeService;
 
 import jakarta.validation.Valid;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
+import com.organizatec.peoplemgmt.domain.TimeEntry;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.organizatec.peoplemgmt.service.UnderageEmployeeException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/employees")
@@ -67,5 +64,28 @@ public class EmployeeController {
             model.addAttribute("errorMessage", ex.getMessage()); // SweetAlert no form.html
             return "employees/form";
         }
+    }
+
+    @PostMapping("/{id}/punch")
+    public String punch(@PathVariable("id") Long id,
+                        @RequestParam("type") String type) {
+        TimeEntry.PunchType t = "IN".equalsIgnoreCase(type) ? TimeEntry.PunchType.IN : TimeEntry.PunchType.OUT;
+        employeeService.punch(id, t);
+        return "redirect:/employees";
+    }
+
+    @PostMapping("/{id}/projects/{projectId}/add")
+    public String addProject(@PathVariable Long id, @PathVariable Long projectId){
+        employeeService.addProject(id, projectId);
+        return "redirect:/employees";
+    }
+
+    @PostMapping("/{id}/roles/change")
+    public String changeRole(@PathVariable Long id,
+                             @RequestParam("roleTitle") String roleTitle,
+                             @RequestParam("baseSalary") Double baseSalary,
+                             @RequestParam(value="reason", required=false) String reason){
+        employeeService.registerRoleChange(id, roleTitle, baseSalary, reason);
+        return "redirect:/employees";
     }
 }

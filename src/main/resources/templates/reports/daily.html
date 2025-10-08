@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Relatório diário • Organizatec</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+    <style>
+        :root{
+          --bg:#0b0b10;--panel:#12121a;--card:#0f1117;--text:#e9eef5;--muted:#9aa4b2;
+          --primary:#3b82f6;--accent:#22d3ee;--border:#1f2530;--danger:#ef4444;--ok:#10b981
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0;color:var(--text);background:radial-gradient(1200px 800px at 80% -10%,#12203355,transparent),var(--bg);
+          font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+        a{color:inherit;text-decoration:none}
+        .app{min-height:100svh;display:grid;grid-template-rows:auto 1fr}
+        header{position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(11,11,16,.7);border-bottom:1px solid var(--border)}
+        .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
+        .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+        .badge{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 6px 30px #3b82f633}
+        .nav-links{display:flex;gap:14px}
+        .nav-links a{padding:8px 12px;border-radius:10px;border:1px solid transparent;transition:.2s}
+        .nav-links a:hover{background:#0c1220;border-color:var(--border)}
+
+        main{max-width:1200px;margin:0 auto;padding:28px 20px 40px;display:grid;gap:16px}
+        .title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+        .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0d1220;color:var(--text);cursor:pointer}
+        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#0b0b10;font-weight:700}
+        .btn.ghost{background:#0e1220}
+        .panel{background:linear-gradient(180deg,#0f1422 0%,#0d0f16 100%);border:1px solid var(--border);border-radius:16px;padding:20px;display:grid;gap:18px}
+
+        .filters{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+        .field{display:flex;flex-direction:column;gap:6px}
+        .field label{font-size:13px;color:var(--muted)}
+        .input,.select{width:100%;padding:10px;border-radius:10px;background:#0e1220;color:var(--text);border:1px solid var(--border)}
+        .cards{display:grid;grid-template-columns:repeat(12,1fr);gap:12px}
+        .card{grid-column:span 3;background:#0f1117;border:1px solid var(--border);border-radius:14px;padding:16px}
+        .kpi{font-size:30px;font-weight:800}
+        .muted{color:var(--muted);font-size:13px}
+
+        .split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .table-wrap{background:#0f1117;border:1px solid var(--border);border-radius:14px;overflow:auto}
+        table{width:100%;border-collapse:separate;border-spacing:0}
+        thead th{position:sticky;top:0;background:#0d0f16;border-bottom:1px solid var(--border);padding:12px;text-align:left;font-size:13px;color:var(--muted)}
+        tbody td{padding:10px;border-bottom:1px solid var(--border);font-size:14px}
+        tbody tr:hover{background:#0e1322}
+
+        @media (max-width:900px){.cards .card{grid-column:span 6}.split{grid-template-columns:1fr}}
+        @media print{
+          header,.actions,.nav-links{display:none !important}
+          body{background:#fff;color:#000}
+          main{max-width:none;padding:0}
+          .panel{border:none}
+          .table-wrap{border:none}
+          thead th{background:#fff;color:#000;border-color:#ddd}
+          tbody td{border-color:#eee}
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <div class="nav">
+            <div class="brand">
+                <div class="badge">📊</div>
+                <span>Organizatec · Relatório diário</span>
+            </div>
+            <nav class="nav-links">
+                <a th:href="@{/}">Início</a>
+                <a th:href="@{/employees}">Funcionários</a>
+                <a th:href="@{/visitors/new}">Novo visitante</a>
+                <a th:href="@{/logout}">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="title">
+            <h1>Relatórios & consultas</h1>
+            <div class="actions">
+                <a class="btn" id="btnPrint">Exportar PDF</a>
+                <a class="btn primary"
+                   th:href="@{|/reports/daily/export.csv?from=${from}&to=${to}|}">Exportar CSV</a>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <section class="panel">
+            <div class="filters">
+                <div class="field" style="grid-column:span 2;">
+                    <label for="from">De</label>
+                    <input id="from" class="input" type="date" th:value="${from}"/>
+                </div>
+                <div class="field" style="grid-column:span 2;">
+                    <label for="to">Até</label>
+                    <input id="to" class="input" type="date" th:value="${to}"/>
+                </div>
+                <div class="field" style="grid-column:span 4;">
+                    <label for="emp">Visitantes por responsável</label>
+                    <select id="emp" class="select">
+                        <option value="">Todos</option>
+                        <option th:each="e : ${employees}" th:value="${e.id}" th:text="${e.name}"></option>
+                    </select>
+                </div>
+                <div class="field" style="grid-column:span 4;">
+                    <label for="dept">Visitantes por setor</label>
+                    <select id="dept" class="select">
+                        <option value="">Todos</option>
+                        <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.name}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- KPIs -->
+            <div class="cards">
+                <div class="card">
+                    <div class="muted">Visitantes no período</div>
+                    <div class="kpi" th:text="${totalVisitors}">0</div>
+                </div>
+                <div class="card">
+                    <div class="muted">Funcionários cadastrados</div>
+                    <div class="kpi" th:text="${totalEmployees}">0</div>
+                </div>
+                <div class="card">
+                    <div class="muted">Data inicial</div>
+                    <div class="kpi" th:text="${from}">-</div>
+                </div>
+                <div class="card">
+                    <div class="muted">Data final</div>
+                    <div class="kpi" th:text="${to}">-</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TABELAS -->
+        <section class="split">
+            <!-- Visitantes -->
+            <div class="table-wrap">
+                <table id="tblVisitors">
+                    <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Hora</th>
+                        <th>Visitante</th>
+                        <th>Documento</th>
+                        <th>Anfitrião</th>
+                        <th>Setor</th>
+                        <th>Empresa</th>
+                        <th>Placa</th>
+                        <th>Crachá</th>
+                        <th>Motivo</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="v : ${visitors}"
+                        th:data-emp="${v.visitedEmployee != null ? v.visitedEmployee.id : 0}"
+                        th:data-dept="${v.visitedDepartment != null ? v.visitedDepartment.id : 0}">
+                        <td th:text="${v.entryTime != null ? v.entryTime.toLocalDate() : ''}">-</td>
+                        <td th:text="${v.entryTime != null ? v.entryTime.toLocalTime() : ''}">-</td>
+                        <td th:text="${v.visitorName}">-</td>
+                        <td th:text="${v.documentId}">-</td>
+                        <td th:text="${v.visitedEmployee != null ? v.visitedEmployee.name : ''}">-</td>
+                        <td th:text="${v.visitedDepartment != null ? v.visitedDepartment.name : ''}">-</td>
+                        <td th:text="${v.company}">-</td>
+                        <td th:text="${v.vehiclePlate}">-</td>
+                        <td th:text="${v.badgeCode}">-</td>
+                        <td th:text="${v.reason}">-</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Funcionários (para consultas por departamento/cargo) -->
+            <div class="table-wrap">
+                <table id="tblEmployees">
+                    <thead>
+                    <tr>
+                        <th>Funcionário</th>
+                        <th>Departamento</th>
+                        <th>Cargo</th>
+                        <th>Matrícula</th>
+                        <th>Admissão</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${employees}">
+                        <td th:text="${e.name}">-</td>
+                        <td th:text="${e.department != null ? e.department.name : ''}">-</td>
+                        <td th:text="${e.roleTitle}">-</td>
+                        <td th:text="${e.enrollment}">-</td>
+                        <td th:text="${e.hiredAt}">-</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // Submete filtros alterando a URL (GET)
+    (function () {
+      var from = document.getElementById('from');
+      var to = document.getElementById('to');
+      var emp = document.getElementById('emp');
+      var dept = document.getElementById('dept');
+
+      function go() {
+        var params = [];
+        if (from.value) params.push("from=" + from.value);
+        if (to.value)   params.push("to=" + to.value);
+        // os filtros emp/dept são aplicados no front (mas mantemos na URL para compartilhar o estado)
+        if (emp.value)  params.push("empId=" + emp.value);
+        if (dept.value) params.push("deptId=" + dept.value);
+        window.location.href = "/reports/daily" + (params.length ? ("?" + params.join("&")) : "");
+      }
+
+      from.addEventListener('change', go);
+      to.addEventListener('change', go);
+
+      // Filtro client-side na tabela de visitantes (por responsável/departamento)
+      function applyTableFilter() {
+        var empId = emp.value;
+        var deptId = dept.value;
+        var rows = document.querySelectorAll('#tblVisitors tbody tr');
+        rows.forEach(function (tr) {
+          var okEmp  = !empId  || String(tr.getAttribute('data-emp'))  === String(empId);
+          var okDept = !deptId || String(tr.getAttribute('data-dept')) === String(deptId);
+          tr.style.display = (okEmp && okDept) ? "" : "none";
+        });
+      }
+      emp.addEventListener('change', applyTableFilter);
+      dept.addEventListener('change', applyTableFilter);
+
+      // Aplica filtro inicial se vier empId/deptId na query
+      (function initSelectsFromQuery(){
+        var qs = new URLSearchParams(window.location.search);
+        var qEmp = qs.get("empId"), qDept = qs.get("deptId");
+        if (qEmp)  emp.value  = qEmp;
+        if (qDept) dept.value = qDept;
+        applyTableFilter();
+      })();
+
+      // Exportar PDF (impressão)
+      document.getElementById('btnPrint').addEventListener('click', function(){
+        window.print();
+      });
+    })();
+</script>
+</body>
+</html>
