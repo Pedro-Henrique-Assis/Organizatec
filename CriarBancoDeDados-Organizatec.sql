@@ -110,6 +110,7 @@ CREATE TABLE visits (
 	entry_time      DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
 	exit_time       DATETIME2 NULL,
 	badge_code      VARCHAR(24) NOT NULL,
+	company			VARCHAR(100) NULL,
 	visitor_name	VARCHAR(150) NULL,
 	document_id		VARCHAR(20)  NULL,
 	reason			VARCHAR(500) NULL,
