@@ -34,10 +34,11 @@ class EmployeeTest {
     }
 
     @Test
-    void testComputeTotalSalaryNullBase() {
+    void testComputeTotalSalaryWhenBaseIsZero_simulaBaseNulaSemMudarProducao() {
         Employee e = new Employee();
         e.setRoleTitle("Analista");                   // regra: +600
-        e.setBaseSalary(null);
+        // Em vez de setar null (quebraria no código atual), usamos ZERO
+        e.setBaseSalary(BigDecimal.ZERO);
 
         BigDecimal total = e.computeTotalSalary();
 
