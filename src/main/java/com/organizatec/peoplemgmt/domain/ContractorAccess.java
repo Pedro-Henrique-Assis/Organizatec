@@ -5,23 +5,35 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contractor_access")
-public class ContractorAccess extends BaseEntity {
+public class ContractorAccess {
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "contractor_id")
+    public enum PunchType { IN, OUT }
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "contractor_id", nullable = false) // FK -> contractors.id
     private Contractor contractor;
 
-    @Column(nullable = false)
-    private LocalDateTime entryTime = LocalDateTime.now();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 10) // "IN" / "OUT"
+    private PunchType type;
 
-    private LocalDateTime exitTime;
+    @Column(name = "event_at", nullable = false)
+    private LocalDateTime eventAt;
+
+    // getters/setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
     public Contractor getContractor() { return contractor; }
     public void setContractor(Contractor contractor) { this.contractor = contractor; }
 
-    public LocalDateTime getEntryTime() { return entryTime; }
-    public void setEntryTime(LocalDateTime entryTime) { this.entryTime = entryTime; }
+    public PunchType getType() { return type; }
+    public void setType(PunchType type) { this.type = type; }
 
-    public LocalDateTime getExitTime() { return exitTime; }
-    public void setExitTime(LocalDateTime exitTime) { this.exitTime = exitTime; }
+    public LocalDateTime getEventAt() { return eventAt; }
+    public void setEventAt(LocalDateTime eventAt) { this.eventAt = eventAt; }
 }

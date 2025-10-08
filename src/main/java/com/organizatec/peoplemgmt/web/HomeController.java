@@ -35,11 +35,11 @@ public class HomeController {
         LocalDateTime end = today.atTime(LocalTime.MAX);
 
         long visitorsTodayCount = visitRepo.countByEntryTimeBetween(start, end);
-        long contractorsOpenCount = contractorAccessRepo.countByExitTimeIsNull();
+        long contractorsInside = contractorAccessRepo.countCurrentlyInside();
 
+        model.addAttribute("contractorsInside", contractorsInside);
         model.addAttribute("employeesCount", employeesCount);
         model.addAttribute("visitorsTodayCount", visitorsTodayCount);
-        model.addAttribute("contractorsOpenCount", contractorsOpenCount);
 
         return "index";
     }
