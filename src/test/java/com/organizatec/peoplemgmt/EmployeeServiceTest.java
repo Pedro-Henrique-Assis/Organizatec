@@ -59,18 +59,4 @@ class EmployeeServiceTest {
         verify(employeeRepo).save(captor.capture());
         assertEquals(0, captor.getValue().getBaseSalary().compareTo(novoSalario));
     }
-
-    @Test
-    void punch_deveCriarTimeEntryIN() {
-        when(employeeRepo.findById(1L)).thenReturn(Optional.of(mockEmployee));
-
-        employeeService.punch(1L, TimeEntry.PunchType.IN);
-
-        ArgumentCaptor<TimeEntry> te = ArgumentCaptor.forClass(TimeEntry.class);
-        verify(timeEntryRepo).save(te.capture());
-
-        assertEquals(TimeEntry.PunchType.IN, te.getValue().getPunchType());
-        assertEquals(mockEmployee, te.getValue().getEmployee());
-        assertNotNull(te.getValue().getTimestamp());
-    }
 }

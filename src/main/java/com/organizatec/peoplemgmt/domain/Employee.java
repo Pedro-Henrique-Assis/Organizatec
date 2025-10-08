@@ -28,11 +28,11 @@ public class Employee extends BaseEntity {
     private String enrollment;
 
     @NotBlank
-    @Column(nullable = false, length = 100)
+    @Column(name = "role_title", length = 100)
     private String roleTitle;
 
     @NotNull
-    @Column(nullable = false, precision = 12, scale = 2)
+    @Column(name = "base_salary", precision = 15, scale = 2)
     private BigDecimal baseSalary;
 
     @NotNull
@@ -118,21 +118,12 @@ public class Employee extends BaseEntity {
         this.enrollment = enrollment;
     }
 
-    public String getRoleTitle() {
-        return roleTitle;
-    }
+    public String getRoleTitle() { return roleTitle; }
 
-    public void setRoleTitle(String roleTitle) {
-        this.roleTitle = roleTitle;
-    }
+    public void setRoleTitle(String roleTitle) { this.roleTitle = roleTitle; }
 
-    public BigDecimal getBaseSalary() {
-        return baseSalary;
-    }
-
-    public void setBaseSalary(BigDecimal baseSalary) {
-        this.baseSalary = baseSalary;
-    }
+    public BigDecimal getBaseSalary() { return baseSalary; }
+    public void setBaseSalary(BigDecimal baseSalary) { this.baseSalary = baseSalary; }
 
     public LocalDate getHiredAt() {
         return hiredAt;

@@ -90,7 +90,8 @@ CREATE TABLE time_entries (
   employee_id BIGINT NOT NULL
     CONSTRAINT fk_te_emp REFERENCES employees(id) ON DELETE CASCADE,
   punch_type  VARCHAR(10) NOT NULL, -- IN/OUT
-  occurred_at DATETIME2   NOT NULL DEFAULT SYSDATETIME()
+  occurred_at DATETIME2   NOT NULL DEFAULT SYSDATETIME(),
+  punch_time DATETIME2 NULL
 );
 
 /* Visitors (separado do Visit — cadastro de pessoas externas) */
