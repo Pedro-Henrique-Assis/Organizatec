@@ -28,7 +28,14 @@ Focado em **usabilidade e eficiência**, oferece recursos de controle de acesso,
 ### 📊 Relatórios Diários
 - Circulação de pessoas na empresa (funcionários, visitantes e terceiros)  
 - Filtros dinâmicos por cargo, setor ou período  
-- Exportação rápida em PDF/CSV  
+- Exportação rápida em PDF/CSV
+
+### 🧪 Testes Unitários
+
+O sistema possui uma suíte de **testes unitários implementados com JUnit 5 e Mockito**, garantindo a qualidade e o correto funcionamento das principais classes de domínio e serviços.
+
+Os testes cobrem módulos essenciais como **Employee**, **Contractor**, **Visit** e **EmployeeService**, validando cálculos de salário, renovação de contratos, registros de ponto e integridade dos dados.  
+Todos os testes estão localizados em: `src/test/java/com/organizatec/peoplemgmt`
 
 ---
 
