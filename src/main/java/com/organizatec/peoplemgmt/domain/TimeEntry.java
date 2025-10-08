@@ -3,6 +3,10 @@ package com.organizatec.peoplemgmt.domain;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Representa um registro de batida de ponto de um funcionário (entrada ou saída).
+ * Mapeada para a tabela "time_entries".
+ */
 @Entity
 @Table(name="time_entries")
 public class TimeEntry {

@@ -3,6 +3,12 @@ package com.organizatec.peoplemgmt.domain;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Classe base abstrata para todas as entidades do sistema.
+ *
+ * Fornece campos comuns como `id` (chave primária) e `createdAt` (data de criação),
+ * que são herdados por outras entidades, promovendo a reutilização de código.
+ */
 @MappedSuperclass
 public abstract class BaseEntity {
     @Id

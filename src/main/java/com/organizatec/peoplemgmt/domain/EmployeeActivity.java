@@ -5,6 +5,12 @@ import jakarta.validation.constraints.NotBlank;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+/**
+ * Representa uma atividade realizada por um funcionário.
+ *
+ * Contém informações sobre o que foi feito, quando começou e quando terminou.
+ * Mapeada para a tabela "employee_activities".
+ */
 @Entity
 @Table(name="employee_activities")
 public class EmployeeActivity {

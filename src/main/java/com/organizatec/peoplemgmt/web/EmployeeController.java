@@ -13,6 +13,12 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controlador Spring MVC para gerenciar as requisições web relacionadas a funcionários.
+ *
+ * Mapeia as URLs sob o caminho "/employees" para as operações de listar,
+ * criar e interagir com os registros de funcionários.
+ */
 @Controller
 @RequestMapping("/employees")
 public class EmployeeController {
@@ -26,6 +32,12 @@ public class EmployeeController {
         this.departmentRepo = departmentRepo;
     }
 
+    /**
+     * Manipula requisições GET para "/employees" e exibe a lista de todos os funcionários.
+     *
+     * @param model O objeto Model para adicionar atributos que serão usados na view.
+     * @return O nome da view Thymeleaf "employees/list" para ser renderizada.
+     */
     @GetMapping
     public String list(Model model) {
         model.addAttribute("employees", employeeService.findAll());
@@ -39,6 +51,11 @@ public class EmployeeController {
         return "employees/form";
     }
 
+    /**
+     * Manipula requisições POST para "/employees/{id}/punch" para registrar uma batida de ponto.
+     *
+     * @return Uma string de redirecionamento para a lista de funcionários.
+     */
     @PostMapping
     public String create(@Valid @ModelAttribute("employee") Employee employee,
                          BindingResult br,

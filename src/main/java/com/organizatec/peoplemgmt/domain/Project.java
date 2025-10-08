@@ -2,6 +2,11 @@ package com.organizatec.peoplemgmt.domain;
 
 import jakarta.persistence.*;
 
+
+/**
+ * Representa um projeto no qual os funcionários podem ser alocados.
+ * Mapeada para a tabela "projects".
+ */
 @Entity
 @Table(name = "projects")
 public class Project {

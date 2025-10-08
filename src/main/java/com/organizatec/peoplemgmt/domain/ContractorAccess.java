@@ -3,10 +3,17 @@ package com.organizatec.peoplemgmt.domain;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Representa um registro de evento de acesso (entrada ou saída) de um terceirizado.
+ * Mapeada para a tabela "contractor_access".
+ */
 @Entity
 @Table(name = "contractor_access")
 public class ContractorAccess {
 
+    /**
+     * Enumeração para os tipos de batida de ponto: Entrada (IN) ou Saída (OUT).
+     */
     public enum PunchType { IN, OUT }
 
     @Id

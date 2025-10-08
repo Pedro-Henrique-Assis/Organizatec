@@ -26,7 +26,12 @@ public class EmployeeService {
     private final EmployeeRoleHistoryRepo roleHistoryRepo;
     private final EmployeeActivityRepo activityRepo;
 
-
+    /**
+     * Classe de serviço para gerenciar a lógica de negócio relacionada a funcionários.
+     * <p>
+     * Esta classe encapsula as operações de CRUD e outras regras de negócio,
+     * como validações, geração de matrícula e registro de ponto.
+     */
     public EmployeeService(EmployeeRepo employeeRepo,
                            TimeEntryRepo timeRepo,
                            ProjectRepo projectRepo,
@@ -48,9 +53,16 @@ public class EmployeeService {
                 + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
     }
 
+    /**
+     * Salva um novo funcionário no banco de dados após realizar validações.
+     *
+     * @param e O objeto {@link Employee} a ser salvo.
+     * @return O funcionário salvo com o ID e matrícula gerados.
+     * @throws UnderageEmployeeException se o funcionário for menor de 18 anos.
+     * @throws org.springframework.dao.DuplicateKeyException se o CPF já estiver cadastrado.
+     */
     @Transactional
     public Employee saveNew(Employee e) {
-        // valida idade mínima
         LocalDate birth = e.getBirthDate();
         if (birth == null || birth.isAfter(LocalDate.now().minusYears(18))) {
             throw new UnderageEmployeeException("Funcionários com menos de 18 anos não podem ser cadastrados no sistema.");

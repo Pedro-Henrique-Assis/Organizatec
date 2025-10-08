@@ -18,6 +18,9 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+/**
+ * Controlador Spring MVC para gerenciar as requisições web relacionadas a terceirizados.
+ */
 @Controller
 @RequestMapping("/contractors")
 public class ContractorController {
@@ -34,6 +37,11 @@ public class ContractorController {
         this.departmentRepo = departmentRepo;
     }
 
+    /**
+     * Exibe a lista de todos os terceirizados cadastrados.
+     * @param model O Model para adicionar atributos à view.
+     * @return O nome da view "contractors/list".
+     */
     @GetMapping
     public String list(Model model) {
         // Carrega a lista ordenada por nome (ajuste o service se precisar)
@@ -42,6 +50,11 @@ public class ContractorController {
         return "contractors/list";
     }
 
+    /**
+     * Exibe o formulário para cadastrar um novo terceirizado.
+     * @param model O Model para adicionar atributos à view.
+     * @return O nome da view "contractors/form".
+     */
     @GetMapping("/new")
     public String form(Model model) {
         model.addAttribute("contractor", new Contractor());
@@ -50,13 +63,21 @@ public class ContractorController {
         return "contractors/form";
     }
 
+    /**
+     * Processa a submissão do formulário para criar um novo terceirizado.
+     *
+     * @param contractor O objeto Contractor preenchido com os dados do formulário.
+     * @param br O resultado do binding para validação.
+     * @param departmentIds A lista de IDs dos departamentos selecionados.
+     * @param model O Model para o caso de erro, para devolver os dados à view.
+     * @return Redireciona para a lista em caso de sucesso, ou retorna ao formulário em caso de erro.
+     */
     @PostMapping
     public String create(@Valid @ModelAttribute("contractor") Contractor contractor,
                          BindingResult br,
                          @RequestParam(value = "departmentIds", required = false) List<Long> departmentIds,
                          Model model) {
 
-        // Validações básicas
         if (contractor.getContractStart() == null) {
             br.rejectValue("contractStart", "required", "Informe o início do contrato.");
         }
@@ -72,14 +93,12 @@ public class ContractorController {
             br.rejectValue("contractEnd","past","Término do contrato não pode ser anterior a hoje.");
         }
 
-        // Recarrega combos em caso de erro
         if (br.hasErrors()) {
             model.addAttribute("employees", employeeRepo.findAll(Sort.by("name").ascending()));
             model.addAttribute("departments", departmentRepo.findAll(Sort.by("name").ascending()));
             return "contractors/form";
         }
 
-        // Monta departamentos selecionados
         LinkedHashSet<Department> deps = new LinkedHashSet<Department>();
         if (departmentIds != null) {
             for (Long id : departmentIds) {
@@ -98,12 +117,18 @@ public class ContractorController {
             br.reject("error", ex.getMessage());
         }
 
-        // Volta ao form com mensagens
         model.addAttribute("employees", employeeRepo.findAll(Sort.by("name").ascending()));
         model.addAttribute("departments", departmentRepo.findAll(Sort.by("name").ascending()));
         return "contractors/form";
     }
 
+    /**
+     * Registra uma batida de ponto (entrada/saída) para um terceirizado.
+     *
+     * @param id O ID do terceirizado.
+     * @param type O tipo de batida ("IN" ou "OUT").
+     * @return Redireciona para a lista de terceirizados.
+     */
     @PostMapping("/{id}/punch")
     public String punch(@PathVariable("id") Long id,
                         @RequestParam("type") String type) {
@@ -113,6 +138,13 @@ public class ContractorController {
         return "redirect:/contractors";
     }
 
+    /**
+     * Renova o contrato de um terceirizado, atualizando a data de término.
+     *
+     * @param id O ID do terceirizado.
+     * @param newEnd A nova data de término do contrato no formato "yyyy-MM-dd".
+     * @return Redireciona para a lista de terceirizados.
+     */
     @PostMapping("/{id}/renew")
     public String renew(@PathVariable("id") Long id,
                         @RequestParam("newEnd") String newEnd) {

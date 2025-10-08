@@ -4,6 +4,12 @@ package com.organizatec.peoplemgmt.domain;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Representa o registro de uma visita de uma pessoa externa à empresa.
+ *
+ * Contém detalhes sobre o visitante, o anfitrião, motivo e horários.
+ * Mapeada para a tabela "visits".
+ */
 @Entity
 @Table(name = "visits")
 public class Visit {

@@ -11,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Serviço que encapsula a lógica de negócio para a gestão de terceirizados.
+ */
 @Service
 public class ContractorService {
 
@@ -23,6 +26,13 @@ public class ContractorService {
         this.accessRepo = contractorAccessRepo;
     }
 
+    /**
+     * Registra um evento de acesso (entrada ou saída) para um terceirizado.
+     *
+     * @param contractorId O ID do terceirizado.
+     * @param type O tipo de acesso (IN ou OUT).
+     * @throws IllegalArgumentException se o terceirizado não for encontrado.
+     */
     @Transactional
     public void punch(Long contractorId, ContractorAccess.PunchType type) {
         Contractor contractor = contractorRepo.findById(contractorId)

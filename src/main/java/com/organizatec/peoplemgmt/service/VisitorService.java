@@ -13,6 +13,9 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Serviço para gerenciar as operações relacionadas ao registro de visitantes.
+ */
 @Service
 public class VisitorService {
 
@@ -29,11 +32,13 @@ public class VisitorService {
     }
 
     /**
-     * Registra a entrada de uma visita, vinculando as relações por ID.
-     * @param visit objeto vindo do form (visitorName, documentId, company, reason,
-     *              vehiclePlate, entryTime já preenchidos)
-     * @param visitedEmployeeId id do anfitrião (obrigatório)
-     * @param visitedDepartmentId id do departamento (opcional, pode ser null)
+     * Registra a entrada de um visitante no sistema.
+     *
+     * @param visit O objeto {@link Visit} com os dados da visita.
+     * @param visitedEmployeeId O ID do funcionário anfitrião.
+     * @param visitedDepartmentId O ID do departamento visitado (opcional).
+     * @return A entidade {@link Visit} salva.
+     * @throws IllegalArgumentException se o funcionário anfitrião não for encontrado.
      */
     @Transactional
     public Visit register(Visit visit, Long visitedEmployeeId, Long visitedDepartmentId) {

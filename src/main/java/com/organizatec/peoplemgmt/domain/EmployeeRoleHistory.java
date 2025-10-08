@@ -3,6 +3,13 @@ package com.organizatec.peoplemgmt.domain;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+/**
+ * Registra o histórico de cargos e salários de um funcionário.
+ *
+ * Cada registro representa um período em que o funcionário esteve em um
+ * determinado cargo com um salário específico.
+ * Mapeada para a tabela "employee_role_history".
+ */
 @Entity
 @Table(name = "employee_role_history")
 public class EmployeeRoleHistory {

@@ -15,6 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/**
+ * Controlador para o registro de novos visitantes.
+ */
 @Controller
 @RequestMapping("/visitors")
 public class VisitorController {
@@ -27,6 +30,12 @@ public class VisitorController {
         this.employeeRepo = employeeRepo;
     }
 
+    /**
+     * Exibe o formulário para registrar um novo visitante.
+     *
+     * @param model O Model para adicionar a lista de funcionários (anfitriões) à view.
+     * @return O nome da view "visitors/form".
+     */
     @GetMapping("/new")
     public String form(Model model) {
         model.addAttribute("visit", new Visit());
@@ -34,6 +43,16 @@ public class VisitorController {
         return "visitors/form";
     }
 
+    /**
+     * Processa o envio do formulário de registro de visitante.
+     *
+     * @param visit O objeto Visit com os dados do formulário.
+     * @param br O resultado da validação.
+     * @param entryDate A data de entrada (string).
+     * @param entryTimeClock A hora de entrada (string).
+     * @param model O Model para o caso de erro.
+     * @return Redireciona para a página inicial em caso de sucesso, ou volta ao formulário em caso de erro.
+     */
     @PostMapping
     public String create(@Valid @ModelAttribute("visit") Visit visit,
                          BindingResult br,
@@ -41,12 +60,10 @@ public class VisitorController {
                          @RequestParam(name = "entryTimeClock", required = false) String entryTimeClock,
                          Model model) {
 
-        // valida anfitrião
         if (visit.getVisitedEmployee() == null || visit.getVisitedEmployee().getId() == null) {
             br.rejectValue("visitedEmployee", "required", "Selecione o anfitrião.");
         }
 
-        // validação compatível com Java 8 (sem isBlank)
         if (isBlank(entryDate) || isBlank(entryTimeClock)) {
             br.rejectValue("entryTime", "required", "Informe data/hora de entrada.");
         } else {
@@ -69,7 +86,6 @@ public class VisitorController {
         return "redirect:/";
     }
 
-    // ---- util ----
     private static boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }

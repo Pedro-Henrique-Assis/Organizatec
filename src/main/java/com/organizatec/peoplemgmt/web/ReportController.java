@@ -20,6 +20,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+/**
+ * Controlador para a geração de relatórios do sistema.
+ */
 @Controller
 @RequestMapping("/reports")
 public class ReportController {
@@ -36,6 +39,14 @@ public class ReportController {
         this.departmentRepo = departmentRepo;
     }
 
+    /**
+     * Exibe o relatório diário de visitas com base em um intervalo de datas.
+     *
+     * @param from Data de início do filtro.
+     * @param to Data de fim do filtro.
+     * @param model O Model para adicionar os dados à view.
+     * @return O nome da view "reports/daily".
+     */
     @GetMapping("/daily")
     public String daily(
             @RequestParam(value = "from", required = false)
@@ -71,7 +82,13 @@ public class ReportController {
         return "reports/daily";
     }
 
-    // Exportação CSV do relatório (aplica o mesmo intervalo de datas)
+    /**
+     * Gera e exporta o relatório diário em formato CSV.
+     *
+     * @param from Data de início.
+     * @param to Data de fim.
+     * @return Um {@link ResponseEntity} com o arquivo CSV.
+     */
     @GetMapping(value = "/daily/export.csv", produces = "text/csv")
     public ResponseEntity<byte[]> exportCsv(
             @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,

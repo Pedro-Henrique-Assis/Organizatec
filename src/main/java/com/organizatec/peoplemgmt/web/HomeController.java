@@ -11,6 +11,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
+/**
+ * Controlador para a página inicial da aplicação.
+ *
+ * Responsável por carregar dados do dashboard, como contadores de funcionários,
+ * visitantes e terceirizados.
+ */
 @Controller
 public class HomeController {
 
@@ -26,6 +32,12 @@ public class HomeController {
         this.contractorAccessRepo = contractorAccessRepo;
     }
 
+    /**
+     * Exibe a página inicial (dashboard).
+     *
+     * @param model O Model para adicionar atributos à view.
+     * @return O nome da view "index".
+     */
     @GetMapping("/")
     public String index(Model model) {
         long employeesCount = employeeRepo.count();

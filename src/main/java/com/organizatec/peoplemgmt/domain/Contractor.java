@@ -6,6 +6,10 @@ import java.time.LocalDate;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+/**
+ * Representa a entidade de um prestador de serviços terceirizado.
+ * Mapeada para a tabela "contractors".
+ */
 @Entity
 @Table(name = "contractors",
         uniqueConstraints = @UniqueConstraint(columnNames = "cpf"))

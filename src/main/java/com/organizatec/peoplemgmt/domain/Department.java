@@ -2,6 +2,10 @@ package com.organizatec.peoplemgmt.domain;
 
 import jakarta.persistence.*;
 
+/**
+ * Representa um departamento da empresa.
+ * Mapeada para a tabela "departments".
+ */
 @Entity
 @Table(name = "departments")
 public class Department extends BaseEntity {

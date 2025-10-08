@@ -8,6 +8,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Locale;
 
+/**
+ * Representa a entidade Employee, que armazena informações sobre os funcionários.
+ * Mapeada para a tabela "employees" no banco de dados.
+ */
 @Entity
 @Table(name = "employees")
 public class Employee extends BaseEntity {
@@ -51,7 +55,17 @@ public class Employee extends BaseEntity {
     )
     private Set<Project> projects = new HashSet<>();
 
-    // ===== Business Logic =====
+    /**
+     * Calcula o salário total do funcionário, somando o salário base com adicionais
+     * baseados no cargo.
+     *
+     * Regras de adicional:
+     * - "Gerente": + R$1500.00
+     * - "Analista": + R$600.00
+     *
+     * @return Um {@link BigDecimal} representando o salário total. Retorna
+     * apenas o salário base se não houver adicional para o cargo.
+     */
     public BigDecimal computeTotalSalary() {
         String role = roleTitle == null ? "" : roleTitle.toLowerCase(Locale.ROOT);
         BigDecimal allowance;

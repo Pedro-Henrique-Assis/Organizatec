@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Controlador para gerenciar as atividades de um funcionário específico.
+ * Mapeado para a rota aninhada "/employees/{id}/activities".
+ */
 @Controller
 @RequestMapping("/employees/{id}/activities")
 public class EmployeeActivityController {
@@ -25,7 +29,14 @@ public class EmployeeActivityController {
         this.employeeRepo = employeeRepo;
     }
 
-    // GET /employees/{id}/activities  -> lista atividades do funcionário
+    /**
+     * Lista todas as atividades de um funcionário.
+     *
+     * @param employeeId O ID do funcionário (da URL).
+     * @param model O Model para adicionar dados à view.
+     * @return O nome da view "employees/activities".
+     * @throws IllegalArgumentException se o funcionário não for encontrado.
+     */
     @GetMapping
     public String list(@PathVariable("id") Long employeeId, Model model) {
         Employee emp = employeeRepo.findById(employeeId)
@@ -39,7 +50,15 @@ public class EmployeeActivityController {
         return "employees/activities";
     }
 
-    // POST /employees/{id}/activities -> cria uma nova atividade
+    /**
+     * Cria uma nova atividade para o funcionário.
+     *
+     * @param employeeId O ID do funcionário (da URL).
+     * @param title O título da atividade.
+     * @param description A descrição da atividade (opcional).
+     * @param startedAt A data/hora de início (opcional, usa o momento atual se nulo).
+     * @return Redireciona para a lista de atividades do funcionário.
+     */
     @PostMapping
     public String create(@PathVariable("id") Long employeeId,
                          @RequestParam("title") String title,
