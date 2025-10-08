@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Organizatec</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+</head>
+<body>
+<header>
+    <h1>Organizatec – Gestão de Pessoas</h1>
+    <nav>
+        <a th:href="@{/}">Início</a>
+        <a th:href="@{/employees}">Funcionários</a>
+        <a th:href="@{/visitors/new}">Registrar Visitante</a>
+        <a th:href="@{/reports/daily}">Relatório Diário</a>
+    </nav>
+</header>
+<main>
+    <div th:fragment="content"><!-- páginas substituirão este bloco --></div>
+</main>
+<footer><small>&copy; Organizatec</small></footer>
+</body>
+</html>

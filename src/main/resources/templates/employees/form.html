@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Novo Funcionário • Organizatec</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root{
+          --bg:#0b0b10;--panel:#12121a;--card:#0f1117;--text:#e9eef5;--muted:#9aa4b2;
+          --primary:#3b82f6;--accent:#22d3ee;--border:#1f2530;--danger:#ef4444;--ok:#10b981
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+          margin:0;color:var(--text);
+          background:radial-gradient(1200px 800px at 80% -10%,#12203355,transparent),var(--bg);
+          font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif
+        }
+        a{color:inherit;text-decoration:none}
+        .app{min-height:100svh;display:grid;grid-template-rows:auto 1fr}
+        header{position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(11,11,16,.7);border-bottom:1px solid var(--border)}
+        .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
+        .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+        .badge{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 6px 30px #3b82f633}
+        .nav-links{display:flex;gap:14px}
+        .nav-links a{padding:8px 12px;border-radius:10px;border:1px solid transparent;transition:.2s}
+        .nav-links a:hover{background:#0c1220;border-color:var(--border)}
+        main{max-width:1200px;margin:0 auto;padding:28px 20px 40px;display:grid;gap:16px}
+        .title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+        .title h1{margin:0;font-size:clamp(20px,2.2vw,28px)}
+        .actions{display:flex;gap:10px}
+        .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0d1220;color:var(--text);cursor:pointer}
+        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#0b0b10;font-weight:700}
+        .btn.ghost{background:#0e1220}
+        .panel{background:linear-gradient(180deg,#0f1422 0%,#0d0f16 100%);border:1px solid var(--border);border-radius:16px;padding:20px;display:grid;gap:18px}
+        .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+        .field{display:flex;flex-direction:column;gap:6px}
+        .field label{font-size:13px;color:var(--muted)}
+        .input,.select{
+          width:100%;padding:12px;border-radius:10px;background:#0e1220;color:var(--text);border:1px solid var(--border)
+        }
+        .hint{font-size:12px;color:var(--muted)}
+        .error{font-size:12px;color:#fecaca}
+        .divider{height:1px;background:var(--border);margin:4px 0}
+        .summary{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+        .pill{border:1px solid var(--border);background:#0f1628;padding:8px 10px;border-radius:999px;font-size:13px}
+        .ok{color:var(--ok)}
+        @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <div class="nav">
+            <div class="brand">
+                <div class="badge">➕</div>
+                <span>Organizatec · Novo Funcionário</span>
+            </div>
+            <nav class="nav-links">
+                <a th:href="@{/}">Início</a>
+                <a th:href="@{/employees}">Funcionários</a>
+                <a th:href="@{/logout}">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="title">
+            <h1>Cadastrar funcionário</h1>
+            <div class="actions">
+                <a class="btn ghost" th:href="@{/employees}">Cancelar</a>
+                <button class="btn primary" form="employeeForm" type="submit">Salvar</button>
+            </div>
+        </div>
+
+        <section class="panel">
+            <form id="employeeForm" th:action="@{/employees}" th:object="${employee}" method="post" class="grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <!-- Nome -->
+                <div class="field" style="grid-column:span 6;">
+                    <label for="name">Nome completo</label>
+                    <input id="name" class="input" th:field="*{name}" required maxlength="150" placeholder="Ex.: Ana Souza"/>
+                    <div class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">erro</div>
+                </div>
+
+                <!-- CPF -->
+                <div class="field" style="grid-column:span 3;">
+                    <label for="cpf">CPF</label>
+                    <input id="cpf" class="input" th:field="*{cpf}" required maxlength="14" placeholder="000.000.000-00" inputmode="numeric"/>
+                    <div class="hint">Aceita com pontos e traço; será validado.</div>
+                    <div class="error" th:if="${#fields.hasErrors('cpf')}" th:errors="*{cpf}">erro</div>
+                </div>
+
+                <!-- Nascimento -->
+                <div class="field" style="grid-column:span 3;">
+                    <label for="birthDate">Data de nascimento</label>
+                    <input id="birthDate" class="input" type="date" th:field="*{birthDate}" required/>
+                    <div class="error" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}">erro</div>
+                </div>
+
+                <!-- Cargo -->
+                <div class="field" style="grid-column:span 4;">
+                    <label for="roleTitle">Cargo</label>
+                    <input id="roleTitle" class="input" th:field="*{roleTitle}" required maxlength="100" placeholder="Ex.: Analista"/>
+                    <div class="hint">Ex.: Analista, Gerente (impacta prévia de salário total).</div>
+                    <div class="error" th:if="${#fields.hasErrors('roleTitle')}" th:errors="*{roleTitle}">erro</div>
+                </div>
+
+                <!-- Salário -->
+                <div class="field" style="grid-column:span 4;">
+                    <label for="baseSalary">Salário base</label>
+                    <input id="baseSalary" class="input" type="number" step="0.01" min="0"
+                           inputmode="decimal" th:field="*{baseSalary}" required placeholder="5000.00"/>
+                    <div class="error" th:if="${#fields.hasErrors('baseSalary')}" th:errors="*{baseSalary}">erro</div>
+                </div>
+
+                <!-- Admissão -->
+                <div class="field" style="grid-column:span 4;">
+                    <label for="hiredAt">Data de admissão</label>
+                    <input id="hiredAt" class="input" type="date" th:field="*{hiredAt}" required/>
+                    <div class="error" th:if="${#fields.hasErrors('hiredAt')}" th:errors="*{hiredAt}">erro</div>
+                </div>
+
+                <!-- Departamento -->
+                <div class="field" style="grid-column:span 6;">
+                    <label for="department">Departamento</label>
+                    <select id="department" class="select" th:field="*{department.id}" required>
+                        <option value="" disabled
+                                th:selected="${employee.department == null}">Selecione…</option>
+                        <option th:each="d : ${departments}"
+                                th:value="${d.id}"
+                                th:text="${d.name}"></option>
+                    </select>
+                    <div class="error"
+                         th:if="${#fields.hasErrors('department') or #fields.hasErrors('department.id')}"
+                         th:errors="*{department.id}">erro</div>
+                </div>
+
+                <!-- Observações/ajuda -->
+                <div class="field" style="grid-column:span 6;">
+                    <label>Observações</label>
+                    <div class="pill">A matrícula é gerada automaticamente no salvamento.</div>
+                    <div class="pill">Política de adicional (preview): Gerente +1500, Analista +600.</div>
+                </div>
+
+                <div class="divider" style="grid-column:1/-1;"></div>
+
+                <!-- Resumo -->
+                <div class="summary" style="grid-column:1/-1;">
+                    <span class="pill">Salário base: R$ <span id="pBase">0.00</span></span>
+                    <span class="pill">Adicional estimado: R$ <span id="pAllowance">0.00</span></span>
+                    <span class="pill ok">Total estimado: R$ <span id="pTotal">0.00</span></span>
+                </div>
+            </form>
+
+            <div class="actions" style="justify-content:flex-end;">
+                <a class="btn ghost" th:href="@{/employees}">Cancelar</a>
+                <button class="btn primary" form="employeeForm" type="submit">Salvar</button>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // CPF máscara simples
+    (function(){
+      var cpf = document.getElementById('cpf');
+      if(!cpf) return;
+      cpf.addEventListener('input', function(){
+        var v = cpf.value.replace(/\D/g,'').slice(0,11);
+        var m = '';
+        if(v.length>0) m = v.slice(0,3);
+        if(v.length>=4) m += '.'+v.slice(3,6);
+        if(v.length>=7) m += '.'+v.slice(6,9);
+        if(v.length>=10) m += '-'+v.slice(9,11);
+        cpf.value = m;
+      });
+    })();
+
+    // Preview salário total (regra idêntica à do backend)
+    (function(){
+      var base = document.getElementById('baseSalary');
+      var role = document.getElementById('roleTitle');
+      var pBase = document.getElementById('pBase');
+      var pAllowance = document.getElementById('pAllowance');
+      var pTotal = document.getElementById('pTotal');
+
+      function toNum(x){ var n = parseFloat((x||'').toString().replace(',','.')); return isNaN(n)?0:n; }
+      function fmt(n){ return n.toFixed(2); }
+      function allowanceFor(r){
+        r = (r||'').toLowerCase();
+        if(r === 'gerente' || r === 'manager') return 1500.00;
+        if(r === 'analista' || r === 'analyst') return 600.00;
+        return 0.00;
+      }
+      function update(){
+        var b = toNum(base.value);
+        var a = allowanceFor(role.value);
+        pBase.textContent = fmt(b);
+        pAllowance.textContent = fmt(a);
+        pTotal.textContent = fmt(b + a);
+      }
+      [base,role].forEach(el=>el && el.addEventListener('input', update));
+      update();
+    })();
+</script>
+<script th:if="${dupCpf != null}">
+    Swal.fire({
+      icon: 'warning',
+      title: 'Funcionário já cadastrado',
+      text: 'Já existe um funcionário com o CPF [[${dupCpf}]] no sistema.',
+      confirmButtonText: 'Entendi'
+    });
+</script>
+<script th:if="${errorMessage}">
+    Swal.fire({
+      icon: 'warning',
+      title: 'Não foi possível salvar',
+      text: '[[${errorMessage}]]',
+      confirmButtonText: 'Entendi'
+    });
+</script>
+<script>
+    // Validação de idade mínima (18 anos)
+    document.getElementById("employeeForm").addEventListener("submit", function (e) {
+      const birthInput = document.getElementById("birthDate");
+      if (!birthInput || !birthInput.value) return;
+
+      const birthDate = new Date(birthInput.value);
+      const today = new Date();
+
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        e.preventDefault(); // bloqueia envio
+        Swal.fire({
+          icon: 'warning',
+          title: 'Cadastro não permitido',
+          text: 'Funcionários com menos de 18 anos não podem ser cadastrados no sistema.',
+          confirmButtonText: 'Entendi'
+        });
+      }
+    });
+</script>
+<script th:if="${errorMessage}">
+    Swal.fire({ icon:'warning', title:'Não foi possível salvar', text:'[[${errorMessage}]]', confirmButtonText:'Entendi' });
+</script>
+</body>
+</html>

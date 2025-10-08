@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Funcionários • Organizatec</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+    <style>
+        :root{
+          --bg:#0b0b10;--panel:#12121a;--card:#0f1117;--text:#e9eef5;--muted:#9aa4b2;
+          --primary:#3b82f6;--accent:#22d3ee;--border:#1f2530;--danger:#ef4444
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{margin:0;color:var(--text);background:radial-gradient(1200px 800px at 80% -10%,#12203355,transparent),var(--bg);
+          font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+        a{color:inherit;text-decoration:none}
+        .app{min-height:100svh;display:grid;grid-template-rows:auto 1fr}
+
+        header{position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(11,11,16,.7);border-bottom:1px solid var(--border)}
+        .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
+        .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+        .badge{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 6px 30px #3b82f633}
+        .nav-links{display:flex;gap:14px}
+        .nav-links a{padding:8px 12px;border-radius:10px;border:1px solid transparent;transition:.2s}
+        .nav-links a:hover{background:#0c1220;border-color:var(--border)}
+
+        main{max-width:1200px;margin:0 auto;padding:28px 20px 40px;display:grid;gap:16px}
+        .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+        .title{display:flex;flex-direction:column;gap:6px}
+        .title h1{margin:0;font-size:clamp(20px,2.2vw,28px)}
+        .title small{color:var(--muted)}
+        .actions{display:flex;gap:10px}
+        .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0d1220;color:var(--text);cursor:pointer}
+        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#0b0b10;font-weight:700}
+        .btn.danger{background:#1a0f12;border-color:#3a0f16;color:#ffd7d7}
+
+        .panel{background:linear-gradient(180deg,#0f1422 0%,#0d0f16 100%);border:1px solid var(--border);
+          border-radius:16px;padding:16px;display:grid;gap:12px}
+
+        .filters{display:flex;flex-wrap:wrap;gap:10px}
+        .input, .select{
+          background:#0e1220;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:220px
+        }
+        .table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--border);background:var(--card)}
+        table{width:100%;border-collapse:collapse}
+        thead th{position:sticky;top:0;background:#0d1220;border-bottom:1px solid var(--border);text-align:left;padding:12px;font-size:13px;color:var(--muted)}
+        tbody td{border-top:1px solid #151a24;padding:12px;font-size:14px}
+        tbody tr:hover{background:#101626}
+        .cell-actions{display:flex;gap:8px;flex-wrap:wrap}
+        .tag{padding:4px 8px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#0f1628;color:#c7d2fe}
+
+        .empty{
+          display:grid;place-items:center;height:48vh;border:1px dashed var(--border);border-radius:12px;background:#0d1220;color:var(--muted)
+        }
+
+        @media (max-width:900px){
+          .input, .select{min-width:unset;flex:1}
+          .nav{gap:10px}
+          .nav-links{display:none}
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <div class="nav">
+            <div class="brand">
+                <div class="badge">👥</div>
+                <span>Organizatec · Funcionários</span>
+            </div>
+            <nav class="nav-links">
+                <a th:href="@{/}">Início</a>
+                <a th:href="@{/employees}">Funcionários</a>
+                <a th:href="@{/visitors/new}">Registrar visitante</a>
+                <a th:href="@{/reports/daily}">Relatório diário</a>
+                <a th:href="@{/logout}">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="toolbar">
+            <div class="title">
+                <h1>Equipe</h1>
+                <small>
+                    <span th:text="${#lists.size(employees)}">0</span> registro(s)
+                </small>
+            </div>
+            <div class="actions">
+                <a class="btn primary" th:href="@{/employees/new}">Novo funcionário</a>
+                <button class="btn" onclick="exportCSV()">Exportar CSV</button>
+            </div>
+        </div>
+
+        <section class="panel">
+            <div class="filters">
+                <input id="searchInput" class="input" type="search" placeholder="Buscar por nome, CPF, matrícula ou cargo…"
+                       oninput="filterTable()"/>
+                <select id="roleSelect" class="select" onchange="filterTable()">
+                    <option value="">Todos os cargos</option>
+                    <option>Gerente</option>
+                    <option>Analista</option>
+                </select>
+                <select id="deptSelect" class="select" onchange="filterTable()">
+                    <option value="">Todos os departamentos</option>
+                    <option>RH</option>
+                    <option>Segurança</option>
+                    <option>TI</option>
+                    <option>Operações</option>
+                </select>
+            </div>
+
+            <div class="table-wrap" th:if="${#lists.size(employees) > 0}">
+                <table id="employeesTable">
+                    <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>CPF</th>
+                        <th>Matrícula</th>
+                        <th>Cargo</th>
+                        <th>Departamento</th>
+                        <th>Admissão</th>
+                        <th>Salário base</th>
+                        <th style="min-width:220px">Ações</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${employees}">
+                        <td data-col="name" th:text="${e.name}">Nome</td>
+                        <td data-col="cpf" th:text="${e.cpf}">CPF</td>
+                        <td data-col="enrollment" th:text="${e.enrollment}">EMP-…</td>
+                        <td data-col="role" th:text="${e.roleTitle}">Cargo</td>
+                        <td data-col="dept" th:text="${e.department != null ? e.department.name : '-'}">Depto</td>
+                        <td th:text="${e.hiredAt != null ? #temporals.format(e.hiredAt,'dd/MM/yyyy') : '-'}">01/01/2025</td>
+                        <td th:text="${e.baseSalary}">0.00</td>
+                        <td class="cell-actions">
+                            <form th:action="@{|/employees/${e.id}/punch|}" method="post">
+                                <input type="hidden" name="type" value="IN"/>
+                                <button type="submit" class="btn">Bater IN</button>
+                            </form>
+                            <form th:action="@{|/employees/${e.id}/punch|}" method="post">
+                                <input type="hidden" name="type" value="OUT"/>
+                                <button type="submit" class="btn">Bater OUT</button>
+                            </form>
+                            <span class="tag" th:text="${e.computeTotalSalary() != null ? 'Total: ' + e.computeTotalSalary() : ''}"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="empty" th:if="${#lists.size(employees) == 0}">
+                <div style="text-align:center">
+                    <h3 style="margin:0 0 6px">Nenhum funcionário cadastrado</h3>
+                    <p style="margin:0 0 12px">Comece criando o primeiro registro.</p>
+                    <a class="btn primary" th:href="@{/employees/new}">Novo funcionário</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    function filterTable(){
+      const q = (document.getElementById('searchInput').value || '').toLowerCase();
+      const role = (document.getElementById('roleSelect').value || '').toLowerCase();
+      const dept = (document.getElementById('deptSelect').value || '').toLowerCase();
+      const rows = document.querySelectorAll('#employeesTable tbody tr');
+
+      rows.forEach(tr=>{
+        const name = (tr.querySelector('[data-col="name"]')?.textContent || '').toLowerCase();
+        const cpf  = (tr.querySelector('[data-col="cpf"]')?.textContent || '').toLowerCase();
+        const enr  = (tr.querySelector('[data-col="enrollment"]')?.textContent || '').toLowerCase();
+        const r    = (tr.querySelector('[data-col="role"]')?.textContent || '').toLowerCase();
+        const d    = (tr.querySelector('[data-col="dept"]')?.textContent || '').toLowerCase();
+
+        const matchesQ = !q || name.includes(q) || cpf.includes(q) || enr.includes(q) || r.includes(q) || d.includes(q);
+        const matchesRole = !role || r.includes(role);
+        const matchesDept = !dept || d.includes(dept);
+
+        tr.style.display = (matchesQ && matchesRole && matchesDept) ? '' : 'none';
+      });
+    }
+
+    function exportCSV(){
+      const rows = Array.from(document.querySelectorAll('#employeesTable tr'))
+        .map(tr => Array.from(tr.querySelectorAll('th,td')).slice(0,7).map(td => {
+          const t = (td.textContent || '').trim().replaceAll('"','""');
+          return `"${t}"`;
+        }).join(','));
+      const blob = new Blob([rows.join('\n')], {type: 'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'employees.csv'; a.click();
+      URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>

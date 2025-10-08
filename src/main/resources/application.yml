@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    url: "jdbc:sqlserver://localhost:1433;databaseName=organizatec;encrypt=false;trustServerCertificate=true"
+    username: sa
+    password: 11Joshu@90
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate.format_sql: true
+      hibernate.dialect: org.hibernate.dialect.SQLServerDialect
+  thymeleaf:
+    cache: false
+
+server:
+  port: 8080

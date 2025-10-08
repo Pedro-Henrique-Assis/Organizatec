@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-br">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Novo Visitante • Organizatec</title>
+    <link rel="stylesheet" th:href="@{/styles.css}"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root{
+          --bg:#0b0b10;--panel:#12121a;--card:#0f1117;--text:#e9eef5;--muted:#9aa4b2;
+          --primary:#3b82f6;--accent:#22d3ee;--border:#1f2530;--danger:#ef4444;--ok:#10b981
+        }
+        *{box-sizing:border-box}
+        html,body{height:100%}
+        body{
+          margin:0;color:var(--text);
+          background:radial-gradient(1200px 800px at 80% -10%,#12203355,transparent),var(--bg);
+          font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif
+        }
+        a{color:inherit;text-decoration:none}
+        .app{min-height:100svh;display:grid;grid-template-rows:auto 1fr}
+        header{position:sticky;top:0;z-index:10;backdrop-filter:blur(8px);background:rgba(11,11,16,.7);border-bottom:1px solid var(--border)}
+        .nav{max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:16px 20px}
+        .brand{display:flex;align-items:center;gap:12px;font-weight:700}
+        .badge{width:36px;height:36px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent));box-shadow:0 6px 30px #3b82f633}
+        .nav-links{display:flex;gap:14px}
+        .nav-links a{padding:8px 12px;border-radius:10px;border:1px solid transparent;transition:.2s}
+        .nav-links a:hover{background:#0c1220;border-color:var(--border)}
+        main{max-width:1200px;margin:0 auto;padding:28px 20px 40px;display:grid;gap:16px}
+        .title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+        .title h1{margin:0;font-size:clamp(20px,2.2vw,28px)}
+        .actions{display:flex;gap:10px}
+        .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--border);background:#0d1220;color:var(--text);cursor:pointer}
+        .btn.primary{background:linear-gradient(135deg,var(--primary),var(--accent));border:none;color:#0b0b10;font-weight:700}
+        .btn.ghost{background:#0e1220}
+        .panel{background:linear-gradient(180deg,#0f1422 0%,#0d0f16 100%);border:1px solid var(--border);border-radius:16px;padding:20px;display:grid;gap:18px}
+        .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}
+        .field{display:flex;flex-direction:column;gap:6px}
+        .field label{font-size:13px;color:var(--muted)}
+        .input,.select,textarea{
+          width:100%;padding:12px;border-radius:10px;background:#0e1220;color:var(--text);border:1px solid var(--border)
+        }
+        .hint{font-size:12px;color:var(--muted)}
+        .error{font-size:12px;color:#fecaca}
+        .divider{height:1px;background:var(--border);margin:4px 0}
+        @media (max-width:900px){.grid{grid-template-columns:1fr}}
+    </style>
+</head>
+<body>
+<div class="app">
+    <header>
+        <div class="nav">
+            <div class="brand">
+                <div class="badge">🧾</div>
+                <span>Organizatec · Novo Visitante</span>
+            </div>
+            <nav class="nav-links">
+                <a th:href="@{/}">Início</a>
+                <a th:href="@{/employees}">Funcionários</a>
+                <a th:href="@{/reports/daily}">Relatório diário</a>
+                <a th:href="@{/logout}">Sair</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="title">
+            <h1>Registrar visitante</h1>
+            <div class="actions">
+                <a class="btn ghost" th:href="@{/}">Cancelar</a>
+                <button class="btn primary" form="visitForm" type="submit">Salvar</button>
+            </div>
+        </div>
+
+        <section class="panel">
+            <!-- Model attributes esperados: visit (objeto), employees (lista) -->
+            <form id="visitForm" th:action="@{/visitors}" th:object="${visit}" method="post" class="grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <!-- Nome -->
+                <div class="field" style="grid-column:span 6;">
+                    <label for="visitorName">Nome completo</label>
+                    <input id="visitorName" class="input" th:field="*{visitorName}" required maxlength="150" placeholder="Ex.: Carlos Lima"/>
+                    <div class="error" th:if="${#fields.hasErrors('visitorName')}" th:errors="*{visitorName}">erro</div>
+                </div>
+
+                <!-- Documento -->
+                <div class="field" style="grid-column:span 3;">
+                    <label for="documentId">Documento (CPF/RG)</label>
+                    <input id="documentId" class="input" th:field="*{documentId}" required maxlength="20" placeholder="CPF/RG"/>
+                    <div class="error" th:if="${#fields.hasErrors('documentId')}" th:errors="*{documentId}">erro</div>
+                </div>
+
+                <!-- Empresa -->
+                <div class="field" style="grid-column:span 3;">
+                    <label for="company">Empresa</label>
+                    <input id="company" class="input" th:field="*{company}" maxlength="100" placeholder="Opcional"/>
+                    <div class="error" th:if="${#fields.hasErrors('company')}" th:errors="*{company}">erro</div>
+                </div>
+
+                <!-- Anfitrião (funcionário visitado) -->
+                <div class="field" style="grid-column:span 6;">
+                    <label for="visitedEmployee">Anfitrião</label>
+                    <select id="visitedEmployee" class="select" th:field="*{visitedEmployee.id}" required>
+                        <option value="" disabled th:selected="${visit.visitedEmployee == null}">Selecione…</option>
+                        <option th:each="e : ${employees}"
+                                th:value="${e.id}"
+                                th:text="${e.name}"></option>
+                    </select>
+                    <div class="error" th:if="${#fields.hasErrors('visitedEmployee')}" th:errors="*{visitedEmployee}">erro</div>
+                </div>
+
+                <!-- Motivo -->
+                <div class="field" style="grid-column:span 6;">
+                    <label for="reason">Motivo da visita</label>
+                    <textarea id="reason" class="input" th:field="*{reason}" rows="3" maxlength="500" placeholder="Breve descrição…"></textarea>
+                    <div class="error" th:if="${#fields.hasErrors('reason')}" th:errors="*{reason}">erro</div>
+                </div>
+
+                <!-- Data/Hora de entrada -->
+                <div class="field" style="grid-column:span 4;">
+                    <label for="entryDate">Entrada (data)</label>
+                    <input id="entryDate" class="input" type="date" required/>
+                    <div class="hint">Será combinado com o horário abaixo.</div>
+                </div>
+                <div class="field" style="grid-column:span 2;">
+                    <label for="entryTime">Entrada (hora)</label>
+                    <input id="entryTime" class="input" type="time" required/>
+                </div>
+
+                <!-- Placa e Crachá -->
+                <div class="field" style="grid-column:span 3;">
+                    <label for="vehiclePlate">Placa do veículo</label>
+                    <input id="vehiclePlate" class="input" th:field="*{vehiclePlate}" maxlength="8" placeholder="Opcional"/>
+                </div>
+                <div class="field" style="grid-column:span 3;">
+                    <label for="badgeCode">Crachá</label>
+                    <input id="badgeCode" class="input" th:field="*{badgeCode}" maxlength="10" placeholder="Opcional"/>
+                </div>
+
+                <div class="divider" style="grid-column:1/-1;"></div>
+
+                <!-- Campo real de entryTime (hidden LocalDateTime) -->
+                <input type="hidden" id="entryTimeIso" th:field="*{entryTime}"/>
+            </form>
+
+            <div class="actions" style="justify-content:flex-end;">
+                <a class="btn ghost" th:href="@{/}">Cancelar</a>
+                <button class="btn primary" form="visitForm" type="submit">Salvar</button>
+            </div>
+        </section>
+    </main>
+</div>
+
+<script>
+    // Pré-preenche data/hora agora
+    (function(){
+      const d = document.getElementById('entryDate');
+      const t = document.getElementById('entryTime');
+      const now = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      d.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+      t.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    })();
+
+    // Monta entryTime (ISO) antes de enviar e valida campos exigidos
+    document.getElementById('visitForm').addEventListener('submit', function(e){
+      const name = document.getElementById('visitorName').value.trim();
+      const doc  = document.getElementById('documentId').value.trim();
+      const host = document.getElementById('host').value;
+      const d    = document.getElementById('entryDate').value;
+      const t    = document.getElementById('entryTime').value;
+
+      if(!name || !doc || !host || !d || !t){
+        e.preventDefault();
+        Swal.fire({icon:'warning', title:'Campos obrigatórios',
+          text:'Preencha nome, documento, anfitrião e data/hora de entrada.', confirmButtonText:'OK'});
+        return;
+      }
+
+      // combina data/hora -> hidden ISO-8601
+      const iso = `${d}T${t}:00`;
+      document.getElementById('entryTimeIso').value = iso;
+    });
+
+    // Máscaras simples
+    (function(){
+      const plate = document.getElementById('vehiclePlate');
+      if(plate){
+        plate.addEventListener('input',()=>{ plate.value = plate.value.toUpperCase().replace(/[^A-Z0-9-]/g,'').slice(0,8); });
+      }
+    })();
+</script>
+
+<!-- Alerta de erro vindo do backend -->
+<script th:if="${errorMessage}">
+    Swal.fire({ icon:'warning', title:'Não foi possível salvar', text:'[[${errorMessage}]]', confirmButtonText:'Entendi' });
+</script>
+</body>
+</html>
