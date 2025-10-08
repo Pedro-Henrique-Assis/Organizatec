@@ -113,12 +113,12 @@
                     <div class="error-msg" th:if="${#fields.hasErrors('contractStart')}" th:errors="*{contractStart}">erro</div>
                 </div>
 
-                <div class="field" style="grid-column:span 4;">
+                <div class="field">
                     <label for="contractEnd">Término do contrato</label>
-                    <input id="contractEnd" class="input" type="date" th:field="*{contractEnd}"
-                           th:classappend="${#fields.hasErrors('contractEnd')} ? ' invalid'"/>
-                    <div class="error-msg" th:if="${#fields.hasErrors('contractEnd')}" th:errors="*{contractEnd}">erro</div>
-                    <div class="hint">Deixe em branco para vínculo em aberto. Pode ser renovado depois.</div>
+                    <input id="contractEnd" class="input" type="date"
+                           th:field="*{contractEnd}"
+                           th:attr="min=${#temporals.format(#temporals.createNow(),'yyyy-MM-dd')}"
+                           placeholder="Opcional"/>
                 </div>
 
                 <div class="field" style="grid-column:span 6;">
@@ -213,6 +213,33 @@
 
 <script th:if="${errorMessage}">
     Swal.fire({ icon:'warning', title:'Não foi possível salvar', text:'[[${errorMessage}]]', confirmButtonText:'Entendi' });
+</script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    (function () {
+      const form = document.getElementById('contractForm');   // id do <form>
+      if (!form) return;
+
+      form.addEventListener('submit', function (e) {
+        const endVal = (document.getElementById('contractEnd')?.value || '').trim();
+        if (!endVal) return; // término é opcional
+
+        // normaliza datas para comparar apenas Y-M-D
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const endDate = new Date(endVal + 'T00:00:00');
+
+        if (endDate < today) {
+          e.preventDefault();
+          Swal.fire({
+            icon: 'warning',
+            title: 'Data inválida',
+            text: 'O término do contrato não pode ser anterior a hoje.',
+            confirmButtonText: 'Entendi'
+          });
+        }
+      });
+    })();
 </script>
 </body>
 </html>

@@ -37,15 +37,20 @@
         .filters{display:flex;flex-wrap:wrap;gap:10px}
         .input,.select{background:#0e1220;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:220px}
         .table-wrap{overflow:auto;border-radius:12px;border:1px solid var(--border);background:var(--card)}
-        table{width:100%;border-collapse:collapse}
-        thead th{position:sticky;top:0;background:#0d1220;border-bottom:1px solid var(--border);text-align:left;padding:12px;font-size:13px;color:var(--muted)}
-        tbody td{border-top:1px solid #151a24;padding:12px;font-size:14px;vertical-align:top}
+        table{width:100%;border-collapse:collapse;table-layout: auto;}
+        thead th{position:sticky;top:0;background:#0d1220;border-bottom:1px solid var(--border);text-align:left;padding:16px 18px;font-size:14px;color:var(--muted);white-space: nowrap;}
+        tbody td{border-top:1px solid #151a24;padding:16px 18px;font-size:14px;vertical-align:top;white-space: nowrap;}
         tbody tr:hover{background:#101626}
-        .cell-actions{display:flex;gap:8px;flex-wrap:wrap}
+        .cell-actions{display:flex;gap:10px;flex-wrap:wrap}
         .tag{padding:4px 8px;border:1px solid var(--border);border-radius:999px;font-size:12px;background:#0f1628;color:#c7d2fe}
         .renew{display:flex;gap:8px;align-items:center}
         .empty{display:grid;place-items:center;height:48vh;border:1px dashed var(--border);border-radius:12px;background:#0d1220;color:var(--muted)}
-        @media (max-width:900px){.input,.select{min-width:unset;flex:1}.nav{gap:10px}.nav-links{display:none}}
+        @media (max-width: 900px) {
+          thead th, tbody td {
+            padding: 12px 10px;
+            font-size: 13px;
+          }
+        }
     </style>
 </head>
 <body>

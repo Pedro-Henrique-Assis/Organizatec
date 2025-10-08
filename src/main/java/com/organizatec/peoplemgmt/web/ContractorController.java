@@ -66,6 +66,12 @@ public class ContractorController {
             br.rejectValue("contractEnd", "invalid", "Término não pode ser antes do início.");
         }
 
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (contractor.getContractEnd() != null &&
+                contractor.getContractEnd().isBefore(today)) {
+            br.rejectValue("contractEnd","past","Término do contrato não pode ser anterior a hoje.");
+        }
+
         // Recarrega combos em caso de erro
         if (br.hasErrors()) {
             model.addAttribute("employees", employeeRepo.findAll(Sort.by("name").ascending()));
