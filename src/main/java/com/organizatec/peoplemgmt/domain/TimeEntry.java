@@ -15,6 +15,9 @@ public class TimeEntry {
     @JoinColumn(name="employee_id")
     private Employee employee;
 
+    @Column(name = "punch_time", nullable = false)
+    private LocalDateTime punchTime;
+
     @Enumerated(EnumType.STRING)
     @Column(name="punch_type", nullable=false, length=10)
     private PunchType punchType;
@@ -31,4 +34,10 @@ public class TimeEntry {
     public void setPunchType(PunchType punchType) {this.punchType = punchType;}
     public LocalDateTime getOccurredAt() {return occurredAt;}
     public void setOccurredAt(LocalDateTime occurredAt) {this.occurredAt = occurredAt;}
+
+    public LocalDateTime getPunchTime() { return punchTime; }
+    public void setPunchTime(LocalDateTime punchTime) { this.punchTime = punchTime; }
+
+    public LocalDateTime getTimestamp() { return getPunchTime(); }
+    public void setTimestamp(LocalDateTime ts) { setPunchTime(ts); }
 }

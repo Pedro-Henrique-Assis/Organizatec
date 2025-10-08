@@ -147,4 +147,12 @@ public class EmployeeService {
         te.setOccurredAt(LocalDateTime.now());
         return timeRepo.save(te);
     }
+
+    @Transactional
+    public void updateBaseSalary(Long employeeId, BigDecimal newBaseSalary) {
+        Employee emp = employeeRepo.findById(employeeId)
+                .orElseThrow(() -> new IllegalArgumentException("Funcionário não encontrado: " + employeeId));
+        emp.setBaseSalary(newBaseSalary);
+        employeeRepo.save(emp);
+    }
 }

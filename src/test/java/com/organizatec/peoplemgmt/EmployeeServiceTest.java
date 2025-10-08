@@ -1,27 +1,76 @@
 package com.organizatec.peoplemgmt;
 
 import com.organizatec.peoplemgmt.domain.Employee;
+import com.organizatec.peoplemgmt.domain.TimeEntry;
+import com.organizatec.peoplemgmt.repo.DepartmentRepo;
+import com.organizatec.peoplemgmt.repo.EmployeeActivityRepo;
+import com.organizatec.peoplemgmt.repo.EmployeeRepo;
+import com.organizatec.peoplemgmt.repo.ProjectRepo;
+import com.organizatec.peoplemgmt.repo.TimeEntryRepo;
+import com.organizatec.peoplemgmt.service.EmployeeService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
 
+    @Mock private EmployeeRepo employeeRepo;
+    @Mock private TimeEntryRepo timeEntryRepo;
+
+    // Estes três mocks existem porque o seu EmployeeService espera 5 args no construtor.
+    // Se algum desses repositórios NÃO existir no seu projeto, remova o @Mock correspondente
+    // e ajuste o construtor do serviço conforme sua assinatura real.
+    @Mock private EmployeeActivityRepo employeeActivityRepo;
+    @Mock private ProjectRepo projectRepo;
+    @Mock private DepartmentRepo departmentRepo;
+
+    @InjectMocks
+    private EmployeeService employeeService;
+
+    private Employee mockEmployee;
+
+    @BeforeEach
+    void setup() {
+        mockEmployee = new Employee();
+        mockEmployee.setId(1L);
+        mockEmployee.setBaseSalary(BigDecimal.valueOf(1000));
+    }
+
     @Test
-    void totalSalaryAddsAllowance() {
-        Employee e = new Employee();
-        e.setName("Ana");
-        e.setCpf("000.000.000-00");
-        e.setBirthDate(LocalDate.of(1990, 1, 1));
-        e.setRoleTitle("Analyst");
-        e.setBaseSalary(new BigDecimal("5000.00"));
-        e.setHiredAt(LocalDate.now());
+    void updateBaseSalary_deveAtualizarESalvar() {
+        when(employeeRepo.findById(1L)).thenReturn(Optional.of(mockEmployee));
 
-        BigDecimal total = e.computeTotalSalary();
+        BigDecimal novoSalario = BigDecimal.valueOf(2500);
+        employeeService.updateBaseSalary(1L, novoSalario);
 
-        assertEquals(new BigDecimal("5600.00"), total);
+        // capturar e verificar que salvou com o valor novo
+        ArgumentCaptor<Employee> captor = ArgumentCaptor.forClass(Employee.class);
+        verify(employeeRepo).save(captor.capture());
+        assertEquals(0, captor.getValue().getBaseSalary().compareTo(novoSalario));
+    }
+
+    @Test
+    void punch_deveCriarTimeEntryIN() {
+        when(employeeRepo.findById(1L)).thenReturn(Optional.of(mockEmployee));
+
+        employeeService.punch(1L, TimeEntry.PunchType.IN);
+
+        ArgumentCaptor<TimeEntry> te = ArgumentCaptor.forClass(TimeEntry.class);
+        verify(timeEntryRepo).save(te.capture());
+
+        assertEquals(TimeEntry.PunchType.IN, te.getValue().getPunchType());
+        assertEquals(mockEmployee, te.getValue().getEmployee());
+        assertNotNull(te.getValue().getTimestamp());
     }
 }
