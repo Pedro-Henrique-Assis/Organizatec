@@ -1,3 +1,4 @@
+// src/main/java/com/organizatec/peoplemgmt/web/VisitorController.java
 package com.organizatec.peoplemgmt.web;
 
 import com.organizatec.peoplemgmt.domain.Visit;
@@ -9,6 +10,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Controller
 @RequestMapping("/visitors")
@@ -25,19 +30,33 @@ public class VisitorController {
     @GetMapping("/new")
     public String form(Model model) {
         model.addAttribute("visit", new Visit());
-        model.addAttribute("employees", employeeRepo.findAll(Sort.by("name")));
+        model.addAttribute("employees", employeeRepo.findAll(Sort.by("name").ascending()));
         return "visitors/form";
     }
 
     @PostMapping
     public String create(@Valid @ModelAttribute("visit") Visit visit,
                          BindingResult br,
+                         @RequestParam(name = "entryDate", required = false) String entryDate,
+                         @RequestParam(name = "entryTimeClock", required = false) String entryTimeClock,
                          Model model) {
+
+        // valida anfitrião
         if (visit.getVisitedEmployee() == null || visit.getVisitedEmployee().getId() == null) {
-            br.rejectValue("employee", "required", "Selecione o anfitrião.");
+            br.rejectValue("visitedEmployee", "required", "Selecione o anfitrião.");
         }
-        if (visit.getEntryTime() == null) {
+
+        // validação compatível com Java 8 (sem isBlank)
+        if (isBlank(entryDate) || isBlank(entryTimeClock)) {
             br.rejectValue("entryTime", "required", "Informe data/hora de entrada.");
+        } else {
+            try {
+                LocalDate d = LocalDate.parse(entryDate);       // yyyy-MM-dd
+                LocalTime t = LocalTime.parse(entryTimeClock);  // HH:mm
+                visit.setEntryTime(LocalDateTime.of(d, t));
+            } catch (Exception ex) {
+                br.rejectValue("entryTime", "invalid", "Data/hora de entrada inválida.");
+            }
         }
 
         if (br.hasErrors()) {
@@ -47,6 +66,11 @@ public class VisitorController {
         }
 
         visitRepo.save(visit);
-        return "redirect:/"; // ajuste se desejar outra página
+        return "redirect:/";
+    }
+
+    // ---- util ----
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
     }
 }
