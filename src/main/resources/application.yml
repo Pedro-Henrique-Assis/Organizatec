@@ -2,7 +2,7 @@ spring:
   datasource:
     url: "jdbc:sqlserver://localhost:1433;databaseName=organizatec;encrypt=false;trustServerCertificate=true"
     username: sa
-    password: 11Joshu@90
+    password: 123456
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
